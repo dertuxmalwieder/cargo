@@ -80,7 +80,7 @@ browser = "chromium"          # browser to use with `cargo doc --open`,
                               # overrides the `BROWSER` environment variable
 
 [cargo-new]
-vcs = "none"              # VCS to use ('git', 'hg', 'pijul', 'fossil', 'none')
+vcs = "none"              # VCS to use ('git', 'hg', 'pijul', 'fossil', 'svn', 'none')
 
 [http]
 debug = false               # HTTP debugging
@@ -447,9 +447,9 @@ This option is deprecated and unused.
 * Environment: `CARGO_CARGO_NEW_VCS`
 
 Specifies the source control system to use for initializing a new repository.
-Valid values are `git`, `hg` (for Mercurial), `pijul`, `fossil` or `none` to
-disable this behavior. Defaults to `git`, or `none` if already inside a VCS
-repository. Can be overridden with the `--vcs` CLI option.
+Valid values are `git`, `hg` (for Mercurial), `pijul`, `fossil`, `svn`, or
+`none` to disable this behavior. Defaults to `git`, or `none` if already inside
+a VCS repository. Can be overridden with the `--vcs` CLI option.
 
 #### `[http]`
 

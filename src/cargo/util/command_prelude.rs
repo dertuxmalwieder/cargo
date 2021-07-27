@@ -179,12 +179,12 @@ pub trait AppExt: Sized {
             opt(
                 "vcs",
                 "Initialize a new repository for the given version \
-                 control system (git, hg, pijul, or fossil) or do not \
+                 control system (git, hg, pijul, fossil, or svn) or do not \
                  initialize any version control at all (none), overriding \
                  a global configuration.",
             )
             .value_name("VCS")
-            .possible_values(&["git", "hg", "pijul", "fossil", "none"]),
+            .possible_values(&["git", "hg", "pijul", "fossil", "svn", "none"]),
         )
         ._arg(opt("bin", "Use a binary (application) template [default]"))
         ._arg(opt("lib", "Use a library template"))
@@ -584,6 +584,7 @@ pub trait ArgMatchesExt {
             "hg" => VersionControl::Hg,
             "pijul" => VersionControl::Pijul,
             "fossil" => VersionControl::Fossil,
+            "svn" => VersionControl::Svn,
             "none" => VersionControl::NoVcs,
             vcs => panic!("Impossible vcs: {:?}", vcs),
         });

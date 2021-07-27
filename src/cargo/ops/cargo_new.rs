@@ -1,6 +1,6 @@
 use crate::core::{Edition, Shell, Workspace};
 use crate::util::errors::CargoResult;
-use crate::util::{existing_vcs_repo, FossilRepo, GitRepo, HgRepo, PijulRepo};
+use crate::util::{existing_vcs_repo, FossilRepo, GitRepo, HgRepo, PijulRepo, SvnRepo};
 use crate::util::{restricted_names, Config};
 use anyhow::Context as _;
 use cargo_util::paths;
@@ -19,6 +19,7 @@ pub enum VersionControl {
     Hg,
     Pijul,
     Fossil,
+    Svn,
     NoVcs,
 }
 
@@ -31,6 +32,7 @@ impl FromStr for VersionControl {
             "hg" => Ok(VersionControl::Hg),
             "pijul" => Ok(VersionControl::Pijul),
             "fossil" => Ok(VersionControl::Fossil),
+            "svn" => Ok(VersionControl::Svn),
             "none" => Ok(VersionControl::NoVcs),
             other => anyhow::bail!("unknown vcs specification: `{}`", other),
         }
@@ -519,6 +521,11 @@ pub fn init(opts: &NewOptions, config: &Config) -> CargoResult<NewProjectKind> {
             version_control = Some(VersionControl::Fossil);
             num_detected_vsces += 1;
         }
+        
+        if path.join(".svn").exists() {
+            version_control = Some(VersionControl::Svn);
+            num_detected_vsces += 1;
+        }
 
         // if none exists, maybe create git, like in `cargo new`
 
@@ -654,6 +661,8 @@ fn write_ignore_file(base_path: &Path, list: &IgnoreList, vcs: VersionControl) -
             base_path.join(".fossil-settings/ignore-glob"),
             base_path.join(".fossil-settings/clean-glob"),
         ],
+        // SVN uses propsets. This is left to be done here.
+        VersionControl::Svn => return Ok(()),
         VersionControl::NoVcs => return Ok(()),
     } {
         let ignore: String = match paths::open(&fp_ignore) {
@@ -695,6 +704,11 @@ fn init_vcs(path: &Path, vcs: VersionControl, config: &Config) -> CargoResult<()
         VersionControl::Fossil => {
             if !path.join(".fossil").exists() {
                 FossilRepo::init(path, config.cwd())?;
+            }
+        }
+        VersionControl::Svn => {
+            if !path.join(".svn").exists() {
+                SvnRepo::init(path, config.cwd())?;
             }
         }
         VersionControl::NoVcs => {

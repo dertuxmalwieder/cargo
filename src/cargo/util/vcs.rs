@@ -2,6 +2,7 @@ use crate::util::CargoResult;
 use cargo_util::paths;
 use cargo_util::ProcessBuilder;
 use std::path::Path;
+use url::Url;
 
 // Check if we are in an existing repo. We define that to be true if either:
 //
@@ -29,6 +30,7 @@ pub struct HgRepo;
 pub struct GitRepo;
 pub struct PijulRepo;
 pub struct FossilRepo;
+pub struct SvnRepo;
 
 impl GitRepo {
     pub fn init(path: &Path, _: &Path) -> CargoResult<GitRepo> {
@@ -96,5 +98,28 @@ impl FossilRepo {
             .exec()?;
 
         Ok(FossilRepo)
+    }
+}
+
+impl SvnRepo {
+    pub fn init(path: &Path, cwd: &Path) -> CargoResult<SvnRepo> {
+        // SVN doesn't create the directory so we'll do that first.
+        paths::create_dir_all(path)?;
+
+        // Create a repository ...
+        ProcessBuilder::new("svnadmin")
+            .cwd(cwd)
+            .arg("create")
+            .arg(path)
+            .exec()?;
+        
+        // ... and check it out:
+        let filepath = Url::from_file_path(path).unwrap();
+        ProcessBuilder::new("svn")
+            .cwd(cwd)
+            .arg("checkout")
+            .arg(filepath.as_str())
+            .exec()?;
+        Ok(SvnRepo)
     }
 }
